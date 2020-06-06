@@ -19,6 +19,7 @@
 #include <OgreRenderQueue.h>
 #include <OgreFrameListener.h>
 #include <OgreRoot.h>
+#include <OgreTimer.h>
 
 namespace Ogre
 {
@@ -125,16 +126,17 @@ void ImGuiOverlay::ImGUIRenderable::createFontTexture()
 
     mFontTex->getBuffer()->blitFromMemory(PixelBox(Box(0, 0, width, height), PF_BYTE_RGBA, pixels));
 }
-void ImGuiOverlay::NewFrame(const FrameEvent& evt)
+void ImGuiOverlay::NewFrame()
 {
+    static auto lastTime = Root::getSingleton().getTimer()->getMilliseconds();
+    auto now = Root::getSingleton().getTimer()->getMilliseconds();
+
     ImGuiIO& io = ImGui::GetIO();
     io.DeltaTime = std::max<float>(
-        evt.timeSinceLastFrame,
+        float(now - lastTime)/1000,
         1e-4f); // see https://github.com/ocornut/imgui/commit/3c07ec6a6126fb6b98523a9685d1f0f78ca3c40c
 
-    // Read keyboard modifiers inputs
-    io.KeyAlt = false;
-    io.KeySuper = false;
+    lastTime = now;
 
     OverlayManager& oMgr = OverlayManager::getSingleton();
 
